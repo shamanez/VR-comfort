@@ -2,8 +2,8 @@ import sys
 import csv
 from pytube import YouTube
 
-CSV_PATH = '../data-preprocessing/sample.csv'
-VIDEO_SAVE_PATH = "Download-videos/"
+CSV_PATH = '/home/gsir059/Documents/VR-comfort/data-preprocessing/processed_data.csv'
+VIDEO_SAVE_PATH = "/home/1TB/VR-comfort-youtube-dataset"
 
 # video stream filters
 FILE_EXTENSION = 'mp4'
@@ -23,20 +23,23 @@ while True:
 # open csv file to read  
 with open(CSV_PATH, 'r', encoding='utf-8') as csv_file:
 
-    csv_reader = csv.reader(csv_file, delimiter=',')
+    csv_reader = csv.DictReader(csv_file, delimiter=',')
     line_count = 0
     
     for row in csv_reader:
+       
         line_count +=1
         if line_count == 1: continue    # ignore header line
 
-        game_name = row[0] 
-        video_links = row[3].strip('][').split(', ') # convert videolinks string to a list
-
+        game_name = row['Game'] 
+        video_links = row['Real_Videos'].strip('][').split(', ') # convert videolinks string to a list
+        
+    
+      
+     
         for j in range(len(video_links)): 
             try: 
                 youtube_obj = YouTube(video_links[j])
-
                 # filter streams with resolution list
                 for i in range(len(RESOLUTIONS)):
                     filters = youtube_obj.streams.filter(progressive=True, file_extension=FILE_EXTENSION, res=RESOLUTIONS[i])
