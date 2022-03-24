@@ -2,7 +2,6 @@ import os
 import csv
 import sys
 import re
-import math
 import shutil
 from collections import defaultdict
 
@@ -17,6 +16,8 @@ gamename_subclipfiles_dict = defaultdict(list)
 
 train_videos = []
 validate_videos = []
+
+train_data_percentage = 0.8
 
 # making final dataset directories 
 if not os.path.exists(SAVE_DIR):
@@ -55,9 +56,8 @@ with open(CSV_PATH, 'r', encoding='utf-8') as csv_file:
         game_name=row['Game']
         comfort_class= row['Comfort_Class'].strip(' ')
 
-        # extend subclip-files-list for the comfort class
-        class_gamevideofiles_dict[comfort_class].extend(gamename_subclipfiles_dict[game_name])
-
+        if game_name in gamename_subclipfiles_dict.keys():
+            class_gamevideofiles_dict[comfort_class].append(gamename_subclipfiles_dict[game_name])
 
 
 for comfort_class in class_gamevideofiles_dict:
@@ -70,19 +70,19 @@ for comfort_class in class_gamevideofiles_dict:
     if not os.path.exists(os.path.join(SAVE_VALIDATE_DIR, comfort_class)):
         os.makedirs(os.path.join(SAVE_VALIDATE_DIR, comfort_class))
     
-    # 80% videos from every comfortclass will go into taining, 
-    # 20% videos into validation
-    train_videos = math.ceil(len(class_gamevideofiles_dict[comfort_class]) * (0.8)) 
+    num_of_train_videos = round(len(class_gamevideofiles_dict[comfort_class]) * (train_data_percentage)) 
 
     # taining video-clips
-    for videofile in class_gamevideofiles_dict[comfort_class][:train_videos]:
-        source =  os.path.join(VIDEOS_DIR, videofile)
-        destination = os.path.join(SAVE_TRAIN_DIR, comfort_class, videofile)
-        shutil.move(source, destination)
+    for subclip_list in class_gamevideofiles_dict[comfort_class][:num_of_train_videos]:
+        for subclip in subclip_list:
+            source =  os.path.join(VIDEOS_DIR, subclip)
+            destination = os.path.join(SAVE_TRAIN_DIR, comfort_class, subclip)
+            shutil.move(source, destination)
 
     # validate video-clips
-    for videofile in class_gamevideofiles_dict[comfort_class][train_videos:]:
-        source =  os.path.join(VIDEOS_DIR, videofile)
-        destination = os.path.join(SAVE_VALIDATE_DIR, comfort_class, videofile)
-        shutil.move(source, destination)
+    for subclip_list in class_gamevideofiles_dict[comfort_class][num_of_train_videos:]:
+        for subclip in subclip_list:
+            source =  os.path.join(VIDEOS_DIR, subclip)
+            destination = os.path.join(SAVE_VALIDATE_DIR, comfort_class, subclip)
+            shutil.move(source, destination)
 
