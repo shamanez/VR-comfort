@@ -28,6 +28,8 @@ share/python-wheels/
 MANIFEST
 
 data-files/
+scraped-data-files/
+*.json
 *.csv
 *.mp4
 
